@@ -425,6 +425,34 @@ void proxmox_restore_read_image_at_async(struct ProxmoxRestoreHandle *handle,
                                          char **error);
 
 /**
+ * Retrieve the length of a given archive handle in bytes
+ */
+long proxmox_restore_get_blob_length(struct ProxmoxRestoreHandle *handle,
+                                     const char *archive_name,
+                                     char **error);
+
+/**
+ * Restore an blob (sync)
+ *
+ */
+int proxmox_restore_blob(struct ProxmoxRestoreHandle *handle,
+                         const char *archive_name,
+                         uint8_t *data,
+                         uint64_t size,
+                         char **error,
+                         bool verbose);
+
+void proxmox_restore_blob_async(struct ProxmoxRestoreHandle *handle,
+                                const char *archive_name,
+                                uint8_t *data,
+                                uint64_t size,
+                                void (*callback)(void*),
+                                void *callback_data,
+                                int *result,
+                                char **error,
+                                bool verbose);
+
+/**
  * Serialize all state data into a byte buffer. Can be loaded again with
  * proxmox_import_state. Use for migration for example.
  *

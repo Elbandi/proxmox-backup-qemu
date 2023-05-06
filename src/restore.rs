@@ -1,4 +1,5 @@
 use std::convert::TryInto;
+use std::io::Read;
 use std::sync::{Arc, Mutex};
 
 use anyhow::{bail, format_err, Error};
@@ -208,6 +209,61 @@ impl RestoreTask {
         );
 
         Ok(())
+    }
+
+    pub fn get_blob_length(&self, archive_name: String) -> Result<u64, Error> {
+        let manifest = match self.manifest.get() {
+            Some(manifest) => Arc::clone(manifest),
+            None => bail!("no manifest"),
+        };
+        let file_info = manifest.lookup_file_info(&archive_name)?;
+        Ok(file_info.size)
+    }
+
+    pub async fn restore_blob(
+        &self,
+        archive_name: String,
+        data: DataPointer,
+        size: u64,
+        verbose: bool,
+    ) -> Result<libc::c_int, Error> {
+        if verbose {
+            eprintln!("download and verify backup index");
+        }
+
+        let client = match self.client.get() {
+            Some(reader) => Arc::clone(reader),
+            None => bail!("not connected"),
+        };
+
+        let manifest = match self.manifest.get() {
+            Some(manifest) => Arc::clone(manifest),
+            None => bail!("no manifest"),
+        };
+
+        let mut reader = client
+            .download_blob(&manifest, &archive_name)
+            .await?;
+
+        let start_time = std::time::Instant::now();
+
+        let buf: &mut [u8] =
+            unsafe { std::slice::from_raw_parts_mut(data.0 as *mut u8, size as usize) };
+        let bytes = reader.read(buf)?;
+        reader.finish()?;
+
+        let end_time = std::time::Instant::now();
+        let elapsed = end_time.duration_since(start_time);
+        if verbose {
+            eprintln!(
+                "restore blob complete (bytes={}, duration={:.2}s, speed={:.2}MB/s)",
+                bytes,
+                elapsed.as_secs_f64(),
+                bytes as f64 / (1024.0 * 1024.0 * elapsed.as_secs_f64())
+            );
+        }
+
+        Ok(bytes.try_into()?)
     }
 
     pub fn get_image_length(&self, aid: u8) -> Result<u64, Error> {

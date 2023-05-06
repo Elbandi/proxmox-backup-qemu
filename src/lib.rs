@@ -1160,6 +1160,93 @@ pub extern "C" fn proxmox_restore_read_image_at_async(
     });
 }
 
+/// Retrieve the length of a given archive handle in bytes
+#[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub extern "C" fn proxmox_restore_get_blob_length(
+    handle: *mut ProxmoxRestoreHandle,
+    archive_name: *const c_char, // expect full name here, i.e. "name.img.fidx"
+    error: *mut *mut c_char,
+) -> c_long {
+    let restore_task = restore_handle_to_task(handle);
+    // TODO: null check
+    let archive_name = unsafe { tools::utf8_c_string_lossy_non_null(archive_name) };
+    let result = restore_task.get_blob_length(archive_name);
+    match result {
+        Ok(res) => res as i64,
+        Err(err) => raise_error_int!(error, err),
+    }
+}
+
+/// Restore an blob (sync)
+///
+#[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub extern "C" fn proxmox_restore_blob(
+    handle: *mut ProxmoxRestoreHandle,
+    archive_name: *const c_char, // expect full name here, i.e. "name.img.fidx"
+    data: *mut u8,
+    size: u64,
+    error: *mut *mut c_char,
+    verbose: bool,
+) -> c_int {
+    let mut result: c_int = -1;
+
+    let mut got_result_condition = GotResultCondition::new();
+
+    let callback_info = got_result_condition.callback_info(&mut result, error);
+
+    proxmox_restore_blob_async(
+        handle,
+        archive_name,
+        data,
+        size,
+        callback_info.callback,
+        callback_info.callback_data,
+        callback_info.result,
+        callback_info.error,
+        verbose
+    );
+
+    got_result_condition.wait();
+
+    result
+}
+
+#[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub extern "C" fn proxmox_restore_blob_async(
+    handle: *mut ProxmoxRestoreHandle,
+    archive_name: *const c_char, // expect full name here, i.e. "name.img.fidx"
+    data: *mut u8,
+    size: u64,
+    callback: extern "C" fn(*mut c_void),
+    callback_data: *mut c_void,
+    result: *mut c_int,
+    error: *mut *mut c_char,
+    verbose: bool,
+) {
+    let restore_task = restore_handle_to_task(handle);
+
+    let callback_info = CallbackPointers {
+        callback,
+        callback_data,
+        error,
+        result,
+    };
+
+    param_not_null!(archive_name, callback_info);
+    let archive_name = unsafe { tools::utf8_c_string_lossy_non_null(archive_name) };
+
+    param_not_null!(data, callback_info);
+    let data = DataPointer(data);
+
+    restore_task.runtime().spawn(async move {
+        let result = restore_task.restore_blob(archive_name, data, size, verbose).await;
+        callback_info.send_result(result);
+    });
+}
+
 /// Serialize all state data into a byte buffer. Can be loaded again with
 /// proxmox_import_state. Use for migration for example.
 ///
