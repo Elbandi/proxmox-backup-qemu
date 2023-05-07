@@ -117,6 +117,17 @@ impl RestoreTask {
         self.runtime.handle().clone()
     }
 
+    pub fn get_file_name(&self, index: u32) -> Result<Option<String>, Error> {
+        let manifest = match self.manifest.get() {
+            Some(manifest) => Arc::clone(manifest),
+            None => bail!("no manifest"),
+        };
+        match manifest.files().get(index as usize) {
+            Some(s) => Ok(Some(s.filename.clone())),
+            None => Ok(None)
+//            None => Err(anyhow!("index out of bounds")),
+        }
+    }
     pub async fn restore_image(
         &self,
         archive_name: String,

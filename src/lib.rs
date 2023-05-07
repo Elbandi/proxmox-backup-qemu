@@ -961,6 +961,27 @@ pub extern "C" fn proxmox_restore_disconnect(handle: *mut ProxmoxRestoreHandle) 
     shared_cache::shared_chunk_cache_cleanup();
 }
 
+/// Get file name
+#[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub extern "C" fn proxmox_manifest_get_filename(
+    handle: *mut ProxmoxRestoreHandle,
+    index: u32,
+    error: *mut *mut c_char,
+) -> *mut c_char {
+    let restore_task = restore_handle_to_task(handle);
+    match restore_task.get_file_name(index) {
+        Ok(filename) => match filename {
+            Some(filename) => {
+                let s = CString::new(filename).unwrap();
+                unsafe { libc::strdup(s.as_ptr()) }
+            },
+            None => std::ptr::null_mut(),
+        },
+        Err(err) => raise_error_null!(error, err)
+    }
+}
+
 /// Restore an image (sync)
 ///
 /// Image data is downloaded and sequentially dumped to the callback.

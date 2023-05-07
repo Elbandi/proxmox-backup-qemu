@@ -349,6 +349,13 @@ void proxmox_restore_connect_async(struct ProxmoxRestoreHandle *handle,
 void proxmox_restore_disconnect(struct ProxmoxRestoreHandle *handle);
 
 /**
+ * Get file name
+ */
+char *proxmox_manifest_get_filename(struct ProxmoxRestoreHandle *handle,
+                                    uint32_t index,
+                                    char **error);
+
+/**
  * Restore an image (sync)
  *
  * Image data is downloaded and sequentially dumped to the callback.
