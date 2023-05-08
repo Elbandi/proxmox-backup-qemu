@@ -1,0 +1,52 @@
+name: Build debian packages for release 
+
+on:
+  push:
+    branches:
+      - build
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  debian-package:
+    name: "Build debian packages"
+    runs-on: ubuntu-latest
+    environment:
+      name: "release"
+    container:
+      image: "debian:bullseye"
+    steps:
+      - name: Install dependencies
+        shell: bash
+        run: |
+          echo -e 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";' >/etc/apt/apt.conf.d/99hst
+          apt-get update
+          apt-get -y upgrade
+          apt-get -y install devscripts dpkg-dev debhelper equivs curl git
+      - name: Enable proxmox apt repo
+        run: |
+          echo "deb http://download.proxmox.com/debian bullseye pve-no-subscription" > /etc/apt/sources.list.d/proxmox.list
+          echo "deb http://download.proxmox.com/debian/devel bullseye main" >> /etc/apt/sources.list.d/proxmox.list
+          curl -1sLf http://download.proxmox.com/debian/proxmox-release-bullseye.gpg -o /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
+          apt-get -y update
+      - name: Set package priority
+        shell: bash
+        run: |
+          echo -e 'Package: librust-proxmox-http*\nPin: version 0.7.0-1\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-metrics*\nPin: version 0.2.1*\nPin-Priority: 600\n' >> /etc/apt/preferences.d/proxmox.pref
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          path: source
+      - name: Build package
+        working-directory: source
+        run: |
+          apt-get -y install cargo
+          mk-build-deps -i -r -t 'apt-get -f -y --force-yes'
+          export BUILD_MODE=release
+          dpkg-buildpackage -b -us -uc -rfakeroot
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Debian packages
+          path: ./*.deb
