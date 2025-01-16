@@ -33,8 +33,35 @@ jobs:
       - name: Set package priority
         shell: bash
         run: |
-          echo -e 'Package: librust-proxmox-http*\nPin: version 0.7.0-1\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
-          echo -e 'Package: librust-proxmox-metrics*\nPin: version 0.2.1*\nPin-Priority: 600\n' >> /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-aho-corasick*\nPin: version 0.7*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-async-trait*\nPin: version 0.1.24*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-backtrace+backtrace-sys-dev\nPin: version 0.3.44*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-backtrace+default-dev\nPin: version 0.3.44*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-backtrace-dev\nPin: version 0.3.44*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-generic-array-dev\nPin: version 0.14.4*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-half-dev\nPin: version 1.6*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-handlebars-dev\nPin: version 3.0.1*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-idna-dev\nPin: version 0.2*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-libloading-dev\nPin: version 0.6*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-nix-dev\nPin: version 0.26*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-pest*\nPin: version 2.1*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-apt*\nPin: version 0.10.2*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-auth-api*\nPin: version 0.3.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-compression*\nPin: version 0.2.1*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-http*\nPin: version 0.9.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-human-byte*\nPin: version 0.1.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-ldap-dev*\nPin: version 0.2.1*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-metrics*\nPin: version 0.3.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-openid*\nPin: version 0.10.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-rest-server*\nPin: version 0.4.1*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-rest-server-dev\nPin: version 0.4.1-1*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-shared-memory*\nPin: version 0.3.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-subscription*\nPin: version 0.4.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-sys*\nPin: version 0.5.0*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-proxmox-tfa*\nPin: version 4.0.2*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-rustyline*\nPin: version 9.1.2-1~bpo11+pve2\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-spin-dev\nPin: version 0.5*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
+          echo -e 'Package: librust-xattr-dev\nPin: version 0.2*\nPin-Priority: 600\n' > /etc/apt/preferences.d/proxmox.pref
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
