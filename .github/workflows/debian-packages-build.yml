@@ -70,7 +70,7 @@ jobs:
         working-directory: source
         run: |
           apt-get -y install cargo
-          mk-build-deps -i -r -t 'apt-get -f -y --force-yes'
+          mk-build-deps -i -r -t "apt-get -o Debug::pkgProblemResolver=yes -y --no-install-recommends"
           export BUILD_MODE=release
           dpkg-buildpackage -b -us -uc -rfakeroot
       - uses: actions/upload-artifact@v3
